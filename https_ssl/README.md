@@ -23,6 +23,23 @@ and terminate SSL on the HAProxy load balancer.
 | File | Description |
 | ---- | ----------- |
 | `0-world_wide_web` | Display the record type and destination of a domain's subdomains (`www`, `lb-01`, `web-01`, `web-02`, or a single given subdomain) |
+| `1-haproxy_ssl_termination` | HAProxy config (`/etc/haproxy/haproxy.cfg`) on lb-01 that accepts HTTPS on port 443, decrypts it, and passes it to web-01 and web-02 |
+
+## SSL certificate
+
+The certificate for `www.danieleze.tech` comes from Let's Encrypt, using
+certbot in standalone mode on lb-01. HAProxy expects the certificate and
+private key in one file, so a deploy hook combines them:
+
+```
+certbot certonly --standalone -d www.danieleze.tech \
+    --pre-hook "service haproxy stop" \
+    --post-hook "service haproxy start" \
+    --deploy-hook 'cat "$RENEWED_LINEAGE/fullchain.pem" "$RENEWED_LINEAGE/privkey.pem" > /etc/haproxy/certs/www.danieleze.tech.pem'
+```
+
+Certbot saves the hooks, so automatic renewals free port 80 and rebuild
+the combined file each time.
 
 ## Usage
 
@@ -35,4 +52,7 @@ The subdomain web-02 is a A record and points to 18.133.221.184
 
 $ ./0-world_wide_web danieleze.tech web-02
 The subdomain web-02 is a A record and points to 18.133.221.184
+
+$ curl https://www.danieleze.tech
+Holberton School for the win!
 ```
