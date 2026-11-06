@@ -24,6 +24,7 @@ and terminate SSL on the HAProxy load balancer.
 | ---- | ----------- |
 | `0-world_wide_web` | Display the record type and destination of a domain's subdomains (`www`, `lb-01`, `web-01`, `web-02`, or a single given subdomain) |
 | `1-haproxy_ssl_termination` | HAProxy config (`/etc/haproxy/haproxy.cfg`) on lb-01 that accepts HTTPS on port 443, decrypts it, and passes it to web-01 and web-02 |
+| `2-redirect_http_to_https` | HAProxy config that also redirects all HTTP traffic to HTTPS with a 301 |
 
 ## SSL certificate
 
@@ -55,4 +56,9 @@ The subdomain web-02 is a A record and points to 18.133.221.184
 
 $ curl https://www.danieleze.tech
 Holberton School for the win!
+
+$ curl -sI http://www.danieleze.tech
+HTTP/1.1 301 Moved Permanently
+content-length: 0
+location: https://www.danieleze.tech/
 ```
